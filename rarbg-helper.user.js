@@ -94,7 +94,7 @@
         },
       },
     ],
-    options: `<div style="align-items:center;display:flex;flex-direction:row;justify-content:center;">RARBG Helper&nbsp;<iframe src="//ghbtns.com/github-btn.html?user=PeratX&amp;repo=RARBGHelper&amp;type=star&amp;count=true" frameborder="0" style="height:20px;width:120px;"></iframe>&nbsp;<input onchange='javascript:(()=>localStorage.setItem("loadInfoOnHover",this.checked?"1":""))();' type="checkbox" />&nbsp;show more options on hover</div>`,
+    options: `<div style="align-items:center;display:flex;flex-direction:row;justify-content:center;" id="Helper">RARBG Helper&nbsp;<iframe src="//ghbtns.com/github-btn.html?user=PeratX&amp;repo=RARBGHelper&amp;type=star&amp;count=true" frameborder="0" style="height:20px;width:120px;"></iframe>&nbsp;<input onchange='javascript:(()=>localStorage.setItem("loadInfoOnHover",this.checked?"1":""))();' type="checkbox" />&nbsp;show more options on hover</div>`,
   };
 
   let headerNode;
@@ -147,7 +147,9 @@
           magnetLinks = sessionStorage.getItem('RARB_MagnetLinks') || ''
           sessionStorage.setItem('RARB_MagnetLinks',magnetLinks + magnetLink + '\t' )
           console.log('magnetLinks',sessionStorage.getItem('RARB_MagnetLinks'))
-          let papaerLinks = document.getElementById("pager_links");
+          //let papaerLinks = document.getElementById("pager_links");
+          let papaerLinks = document.getElementById("Helper");
+
           let yjxz = document.getElementById("yjxz");
           let qkhc = document.getElementById("qkhc");
           if(yjxz){
