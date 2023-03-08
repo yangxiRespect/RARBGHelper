@@ -42,10 +42,8 @@
 // @match                 *://rarbgproxy.com/*
 // @match                 *://rarbgunblock.com/*
 // @namespace             https://peratx.net
-// @require               https://cdn.jsdelivr.net/npm/infinite-scroll/dist/infinite-scroll.pkgd.min.js
 // @supportURL            https://github.com/PeratX/RARBGHelper
-// @updateURL             https://raw.githubusercontent.com/PeratX/RARBGHelper/master/rarbg-helper.user.js
-// @version               1.7.6
+// @version               1.7.5
 // ==/UserScript==
 
 (async () => {
@@ -96,12 +94,14 @@
         },
       },
     ],
-    options: `<div style="align-items:center;display:flex;flex-direction:row;justify-content:center;">RARBG Helper&nbsp;<iframe src="//ghbtns.com/github-btn.html?user=PeratX&amp;repo=RARBGHelper&amp;type=star&amp;count=true" frameborder="0" style="height:20px;width:120px;"></iframe>&nbsp;<input onchange='javascript:(()=>localStorage.setItem("loadInfoOnHover",this.checked?"1":""))();' type="checkbox" />&nbsp;enable extras on hover</div>`,
+    options: `<div style="align-items:center;display:flex;flex-direction:row;justify-content:center;">RARBG Helper&nbsp;<iframe src="//ghbtns.com/github-btn.html?user=PeratX&amp;repo=RARBGHelper&amp;type=star&amp;count=true" frameborder="0" style="height:20px;width:120px;"></iframe>&nbsp;<input onchange='javascript:(()=>localStorage.setItem("loadInfoOnHover",this.checked?"1":""))();' type="checkbox" />&nbsp;show more options on hover</div>`,
   };
 
   let headerNode;
-  if (document.querySelector("#searchTorrent")) headerNode = document.querySelector("#searchTorrent")?.closest("form");
-  else if (document.querySelector('td[align="center"] > b')?.innerText?.match(/top 100? torrents/i)) headerNode = document.querySelector('td[align="center"] > b')?.closest("table");
+  if (document.querySelector("#searchTorrent"))
+    headerNode = document.querySelector("#searchTorrent")?.closest("form");
+  else if (document.querySelector('td[align="center"] > b')?.innerText?.match(/top 100? torrents/i))
+    headerNode = document.querySelector('td[align="center"] > b')?.closest("table");
 
   if (headerNode) {
     headerNode.innerHTML = settings.options + headerNode.innerHTML;
@@ -143,70 +143,112 @@
 
           const downloadLink = ref?.getAttribute("href");
           const magnetLink = ref?.nextElementSibling?.getAttribute("href");
+          let magnetLinks = ""
+          magnetLinks = sessionStorage.getItem('RARB_MagnetLinks') || ''
+          sessionStorage.setItem('RARB_MagnetLinks',magnetLinks + magnetLink + '\t' )
+          console.log('magnetLinks',sessionStorage.getItem('RARB_MagnetLinks'))
+          let papaerLinks = document.getElementById("pager_links");
+          let yjxz = document.getElementById("yjxz");
+          let qkhc = document.getElementById("qkhc");
+          if(yjxz){
+              papaerLinks.removeChild(yjxz)
+          }
+          if(qkhc){
+              papaerLinks.removeChild(qkhc)
+          }
 
-          node.parentNode.innerHTML = node.parentNode.innerHTML.replace(/(imdb: [0-9.\/]+)/i, `<a href="${imdb}" target="_blank">$1</a>`) + (downloadLink ? `<a href="${downloadLink}" target="_blank">${settings.downloadImg}</a>&nbsp;` : '') + (magnetLink ? `<a href="${magnetLink}" target="_blank">${settings.magnetImg}</a>&nbsp;` : '') + ratingStars;
-        });
+          // 创建新的按钮元素
+          var newButton = document.createElement("button");
+          newButton.setAttribute("id", "yjxz");
+          newButton.innerHTML = "一键复制";
+
+          // 添加 onclick 方法
+          newButton.onclick =function() {
+              // 创建一个临时的textarea元素
+              const textarea = document.createElement('textarea');
+              textarea.value = sessionStorage.getItem('RARB_MagnetLinks');
+              document.body.appendChild(textarea);
+
+              // 选中文本并复制
+              textarea.select();
+              document.execCommand('copy');
+
+              // 移除临时元素
+              document.body.removeChild(textarea);
+          };
+          papaerLinks.appendChild(newButton);
+
+          // 创建新的按钮元素2
+          var newButton2 = document.createElement("button");
+          newButton2.setAttribute("id", "qkhc");
+          newButton2.innerHTML = "清空缓存";
+
+          // 添加 onclick 方法
+          newButton2.onclick =function() {
+              sessionStorage.removeItem('RARB_MagnetLinks')
+          };
+          papaerLinks.appendChild(newButton2);
+    node.parentNode.innerHTML = node.parentNode.innerHTML.replace(/(imdb: [0-9.\/]+)/i, `<a href=" " target="_blank">$1</a >`) + (downloadLink ? `<a href="${downloadLink}" target="_blank">${settings.downloadImg}</a >&nbsp;` : '') + (magnetLink ? `<a href="${magnetLink}" target="_blank">${settings.magnetImg}</a >&nbsp;` : '')
+              +(downloadLink ?
+  `<button onclick="
+  const textarea = document.createElement('textarea');
+  textarea.value = '${magnetLink}';
+  document.body.appendChild(textarea);
+
+  // 选中文本并复制
+  textarea.select();
+  document.execCommand('copy');
+
+  // 移除临时元素
+  document.body.removeChild(textarea);">复制</button>`:'')
+              + ratingStars;        });
     }
   }
 
   const opened = JSON.parse(localStorage.getItem("opened") || "[]");
   const viewed = JSON.parse(localStorage.getItem("viewed") || "[]");
 
-  function nodeHandler(node) {
-    const borderHighlightNode = node.closest("tr")?.firstElementChild;
-    if (borderHighlightNode) {
-      if (viewed.includes(node.href)) borderHighlightNode.style.borderLeft = "2px solid yellow";
+  setTimeout(() => {
+    for (let node of document.querySelectorAll('.lista2 > td:nth-child(2) > a[href^="/torrent/"], .lista_related a[href^="/torrent/"]') || []) {
+      const borderNode = node.closest("tr")?.firstElementChild;
+
+      if (viewed.includes(node.href)) borderNode.style.borderLeft = "2px solid yellow";
       else viewed.push(node.href);
 
-      if (opened.includes(node.href)) borderHighlightNode.style.borderLeft = "2px solid red";
-    }
+      if (opened.includes(node.href)) borderNode.style.borderLeft = "2px solid red";
 
-    const onMouseOver = node.attributes.onmouseover;
-    if (!onMouseOver) return;
+      const onMouseOver = node.attributes.onmouseover;
+      if (!onMouseOver) continue;
 
-    if (settings.loadInfoOnHover)
-      node.addEventListener("mouseover", () => addSuffix(node));
+      if (settings.loadInfoOnHover)
+        node.addEventListener("mouseover", () => addSuffix(node));
 
-    const parts = onMouseOver.value.split("/");
-    switch (parts[3]) {
-      case "static":
-        switch (parts[4]) {
-          case "over": // 18+
-            onMouseOver.value = onMouseOver.value.replace("static/over", "posters2/" + parts[5].substr(0, 1));
-            break;
+      const parts = onMouseOver.value.split("/");
+      switch (parts[3]) {
+        case "static": {
+          switch (parts[4]) {
+            case "over": // 18+
+              onMouseOver.value = onMouseOver.value.replace("static/over", "posters2/" + parts[5].substr(0, 1));
+              break;
 
-          case "20": // tvdb
-            onMouseOver.value = onMouseOver.value.replace("_small", "_banner_optimized");
-            break;
+            case "20": // tvdb
+              onMouseOver.value = onMouseOver.value.replace("_small", "_banner_optimized");
+              break;
+          }
+
+          break;
         }
-        break;
 
-      case "mimages": // movie
-        onMouseOver.value = onMouseOver.value.replace("over_opt", "poster_opt");
-        break;
+        case "mimages": // movie
+          onMouseOver.value = onMouseOver.value.replace("over_opt", "poster_opt");
+          break;
+      }
     }
-  }
-
-  setTimeout(() => {
-    document.querySelectorAll('.lista2 > td:nth-child(2) > a[href^="/torrent/"], .lista_related a[href^="/torrent/"]').forEach(i => nodeHandler(i))
-    localStorage.setItem("viewed", JSON.stringify(viewed.slice(~settings.localStorageMaxEntries + 1)));
   });
 
-  if (location.href.match(/https?:\/\/[^\/]*rarbg[^\/]*\.[a-z]{2,4}\/torrent\/[^\/\?]+/) && !opened.includes(location.href)) opened.push(location.href);
+  if (location.href.match(/https?:\/\/[^\/]*rarbg[^\/]*\.[a-z]{2,4}\/torrent\/[^\/\?]+/) && !opened.includes(location.href))
+    opened.push(location.href);
+
   localStorage.setItem("opened", JSON.stringify(opened.slice(~settings.localStorageMaxEntries + 1)));
-
-  const infiniteScroll = new InfiniteScroll('.lista2t', {
-    append: '.lista2',
-    // hideNav: '#pager_links',
-    history: false,
-    path: 'a[title="next page"]',
-    // status: '.status',
-  });
-
-  infiniteScroll.on('append', (body, path, nodes, response) => {
-    nodes.forEach(i => nodeHandler(i.querySelector('.lista2 > td:nth-child(2) > a[href^="/torrent/"]')));
-    localStorage.setItem("viewed", JSON.stringify(viewed.slice(~settings.localStorageMaxEntries + 1)));
-  });
-
-  document.querySelectorAll('#pager_links').forEach(i => i.style.display = "none"); // hide pagination
+  localStorage.setItem("viewed", JSON.stringify(viewed.slice(~settings.localStorageMaxEntries + 1)));
 })();
