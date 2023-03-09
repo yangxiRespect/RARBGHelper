@@ -177,6 +177,8 @@
 
               // 移除临时元素
               document.body.removeChild(textarea);
+                        return false;
+
           };
           papaerLinks.appendChild(newButton);
 
@@ -187,7 +189,8 @@
 
           // 添加 onclick 方法
           newButton2.onclick =function() {
-              sessionStorage.removeItem('RARB_MagnetLinks')
+              sessionStorage.removeItem('RARB_MagnetLinks');
+            return false;
           };
           papaerLinks.appendChild(newButton2);
     node.parentNode.innerHTML = node.parentNode.innerHTML.replace(/(imdb: [0-9.\/]+)/i, `<a href=" " target="_blank">$1</a >`) + (downloadLink ? `<a href="${downloadLink}" target="_blank">${settings.downloadImg}</a >&nbsp;` : '') + (magnetLink ? `<a href="${magnetLink}" target="_blank">${settings.magnetImg}</a >&nbsp;` : '')
